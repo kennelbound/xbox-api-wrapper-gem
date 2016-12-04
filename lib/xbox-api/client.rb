@@ -13,6 +13,10 @@ module XboxApi
       XboxApi::Gamer.new(tag, self)
     end
 
+    def game(id)
+      XboxApi::Game.new(id, self)
+    end
+
     def fetch_body_and_parse(endpoint)
       parse(get_with_token(endpoint).read)
     end
