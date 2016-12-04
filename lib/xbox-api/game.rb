@@ -8,7 +8,7 @@ module XboxApi
     end
 
     def details
-      endpoint = "game-details-hex/#{id.to_s(16)}/#{__method__}".gsub("_", "-")
+      endpoint = "game-details-hex/#{@id}"
       client.fetch_body_and_parse(endpoint)
     end
 

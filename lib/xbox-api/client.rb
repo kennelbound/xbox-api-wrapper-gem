@@ -7,6 +7,7 @@ module XboxApi
     def initialize(api_key)
       @api_key = api_key
       @base_url = "https://xboxapi.com/v2"
+      @last_headers = nil
     end
 
     def gamer(tag)
@@ -18,19 +19,28 @@ module XboxApi
     end
 
     def fetch_body_and_parse(endpoint)
-      parse(get_with_token(endpoint).read)
+      response = get_with_token(endpoint)
+      @last_headers = parse_headers(response.meta)
+      parse(response.read)
     end
 
-    def calls_remaining
-      headers = fetch_headers
+    def calls_remaining(cached = false)
+      if cached && !@last_headers.nil?
+        @last_headers
+      else
+        parse_headers(fetch_headers)
+      end
+    end
+
+    private
+
+    def parse_headers(meta)
       {
-        limit: headers["x-ratelimit-limit"],
-        remaining: headers["x-ratelimit-remaining"],
-        resets_in: headers["x-ratelimit-reset"]
+          limit: meta['x-ratelimit-limit'],
+          remaining: meta['x-ratelimit-remaining'],
+          resets_in: meta['x-ratelimit-reset']
       }
     end
-
-    private 
 
     def parse(json)
       Yajl::Parser.parse(json, symbolize_keys: true)
